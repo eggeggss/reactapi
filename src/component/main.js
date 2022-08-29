@@ -183,10 +183,6 @@ const Main = () => {
                 break;
             default:
         }
-
-
-
-        //alert("delete all");
     }
 
     const changeCurrentInput = (e) => {
@@ -252,16 +248,13 @@ const Main = () => {
                 </ul>
             </nav>
             <div className="conatiner todoListPage vhContainer">
-                <div class="todoList_Content">
+                <div className="todoList_Content">
                     <div className="inputBox">
                         <input type="text" placeholder="請輸入待辦事項"
                             value={currentinput}
                             onChange={changeCurrentInput}
-                            onKeyPress={keydown}
-                            value={currentinput}
-                            onChange={changeCurrentInput}
-                            onKeyPress={keydown} />
-                        <a href="#" onClick={addNewItem} onClick={addNewItem}>
+                            onKeyPress={keydown}/>
+                        <a href="#" onClick={addNewItem}>
                             <i className="fa fa-plus"></i>
                         </a>
                     </div>
