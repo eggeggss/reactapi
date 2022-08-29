@@ -613,3 +613,54 @@ nav ul a span {
 }
 
 /*# sourceMappingURL=all.css.map */
+.text-16 {
+    font-size: 16px;
+}
+
+.text-18 {
+    font-size: 18px;
+}
+
+.text-20 {
+    font-size: 20px;
+}
+
+.text-24 {
+    font-size: 24px;
+}
+
+.text-36 {
+    font-size: 36px;
+}
+
+.product-border-row {
+    border: 1px solid green;
+    border-radius: 10px;
+}
+
+.processing {
+    position: relative;
+}
+
+.processing:after {
+    content: "";
+    display: block;
+    width:  50%;
+    height:  50%;
+    position: absolute;
+    top: 15%;
+    left:25%;
+    opacity: 0.4;
+    background-image: url("../img/loading1.gif");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: initial;
+}
+
+.ReactCollapse--collapse {
+    transition: height 500ms;
+}
+
+.errorhint {
+    color: red;
+}

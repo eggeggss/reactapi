@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 const Signup = () => {
     return (
@@ -20,7 +21,8 @@ const Signup = () => {
                         <label className="formControls_label" htmlFor="pwd">再次輸入密碼</label>
                         <input className="formControls_input" type="password" name="pwd" id="pwd" placeholder="請再次輸入密碼" required />
                         <input className="formControls_btnSubmit" type="button" value="註冊帳號" />
-                        <a className="formControls_btnLink" href="#loginPage">登入</a>
+                        <NavLink className="formControls_btnLink" to="/login">登入</NavLink>
+                        {/* <a className="formControls_btnLink" href="#loginPage">登入</a> */}
                     </form>
                 </div>
             </div>

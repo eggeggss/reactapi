@@ -1,4 +1,7 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
+import {  useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 const Login = () => {
     return (
@@ -17,7 +20,8 @@ const Login = () => {
                         <label className="formControls_label" htmlFor="pwd">密碼</label>
                         <input className="formControls_input" type="password" name="pwd" id="pwd" placeholder="請輸入密碼" required />
                         <input className="formControls_btnSubmit" type="button"  value="登入" />
-                        <a className="formControls_btnLink" href="#signUpPage">註冊帳號</a>
+                        <NavLink className="formControls_btnLink" to="/signup">註冊帳號</NavLink>
+                        {/* <a className="formControls_btnLink" href="#signUpPage">註冊帳號</a> */}
                     </form>
                 </div>
             </div>
