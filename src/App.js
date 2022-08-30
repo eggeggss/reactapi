@@ -7,12 +7,13 @@ import PrivateRoute from './component/layout';
 import Page from './component/pages';
 import { useAuth,AuthContext } from './context/AuthContext';
 import { useState } from 'react';
-import { useApp } from './context/AppContext';
+import { useApp ,AppContext} from './context/AppContext';
 
 function App() {
   const { Main, Login, Signup }=Page;
   const [token, setToken] = useState(null);
-  const {isloading}=useApp();
+  const [isloading,setisLoading]=useState(null);
+  
   let authobj={
      token:token,
      setToken:setToken,
@@ -20,17 +21,19 @@ function App() {
 
   return (
     <>
-      <div className={` ${isloading ? 'processing' : ''}`} >
-          <AuthContext.Provider value={authobj}>
-            <Routes>
-              <Route path="/" element={<PrivateRoute />}>
-                  <Route path="/" element={<Main />} />
-                </Route>
-                <Route path="login" element={<Login />} />
-                <Route path="signup" element={<Signup />} />
-            </Routes>
-          </AuthContext.Provider>
-      </div>
+      <AppContext.Provider value={{isloading, setisLoading}}>
+        <div className={` ${isloading ? 'processing' : ''}`} >
+            <AuthContext.Provider value={authobj}>
+              <Routes>
+                <Route path="/" element={<PrivateRoute />}>
+                    <Route path="/" element={<Main />} />
+                  </Route>
+                  <Route path="login" element={<Login />} />
+                  <Route path="signup" element={<Signup />} />
+              </Routes>
+            </AuthContext.Provider>
+        </div>
+      </AppContext.Provider>
     </>
   );
 }

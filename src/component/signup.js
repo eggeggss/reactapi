@@ -1,18 +1,47 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink,useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
+import { ApiSignup } from '../common/api';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content'
+import { useApp } from '../context/AppContext';
+const MySwal = withReactContent(Swal)
 
 const Signup = () => {
     const [hint, setHint] = useState('');
-    const { register, handleSubmit, formState: { errors }, getValues } = useForm({
+    const { isloading, setisLoading } = useApp();
+    let navigate = useNavigate();
+    const { register, handleSubmit, 
+        formState: { errors }, getValues, reset } = useForm({
         mode:'onChange',
         reValidateMode: 'onChange',
     });
     const onSubmit=async(data)=>{
 
-        console.log(data);
-        alert('submit');
+        let {email,username,password1}=data;
+
+        setisLoading(true);
+
+        let response=await ApiSignup({
+            user:{
+                email:email,
+                nickname:username,
+                password:password1,
+            }
+        })
+
+
+        setisLoading(false);
+        
+        if (response.result==false){
+            MySwal.fire(response.content);
+        }else{
+            //MySwal.fire('註冊成功');
+            reset();
+            navigate('/login', { replace: true });
+            //redirect to login
+        }
 
     }
     let validatePassword=(password1,password2)=>{
