@@ -12,7 +12,6 @@ export function timeout(ms) {
 let webService=async (url,option)=>{
     
     let response = await fetch(url, option);  
-
     if (response.status >= 200 && response.status <= 204) {
         let data = await response.json();       
         return {

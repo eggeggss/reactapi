@@ -6,22 +6,31 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import PrivateRoute from './component/layout';
 import Page from './component/pages';
 import { useAuth,AuthContext } from './context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp ,AppContext} from './context/AppContext';
 
 function App() {
   const { Main, Login, Signup }=Page;
   const [token, setToken] = useState(null);
   const [isloading,setisLoading]=useState(null);
+  const [snackmessage,setSnackmessage]=useState("");
+  
   
   let authobj={
      token:token,
      setToken:setToken,
   }
+  let appobj={
+    isloading: isloading,
+    setisLoading: setisLoading,
+    snackmessage: snackmessage,
+    setSnackmessage: setSnackmessage,
+  }
 
   return (
     <>
-      <AppContext.Provider value={{isloading, setisLoading}}>
+      <AppContext.Provider value={appobj}>
+        <div id="snackbar" className={(snackmessage==="")? "":"show"}>{snackmessage}</div>
         <div className={` ${isloading ? 'processing' : ''}`} >
             <AuthContext.Provider value={authobj}>
               <Routes>

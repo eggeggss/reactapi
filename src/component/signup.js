@@ -1,22 +1,34 @@
 import React from 'react';
 import { NavLink,useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { ApiSignup } from '../common/api';
+import { useState,useEffect } from 'react';
+import { ApiSignup, timeout } from '../common/api';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
 import { useApp } from '../context/AppContext';
+
 const MySwal = withReactContent(Swal)
+
 
 const Signup = () => {
     const [hint, setHint] = useState('');
-    const { isloading, setisLoading } = useApp();
+    const { isloading, setisLoading, snackmessage, setSnackmessage } = useApp();
     let navigate = useNavigate();
+
+    
+    useEffect(()=>{
+        //notify();
+    },[])
+
+    
     const { register, handleSubmit, 
         formState: { errors }, getValues, reset } = useForm({
         mode:'onChange',
         reValidateMode: 'onChange',
     });
+
+
+
     const onSubmit=async(data)=>{
 
         let {email,username,password1}=data;
@@ -31,15 +43,19 @@ const Signup = () => {
             }
         })
 
-
         setisLoading(false);
-        
+
         if (response.result==false){
             MySwal.fire(response.content);
         }else{
             //MySwal.fire('註冊成功');
             reset();
+
             navigate('/login', { replace: true });
+
+            setSnackmessage("註冊成功");
+            await timeout(5000);
+            setSnackmessage("");
             //redirect to login
         }
 
