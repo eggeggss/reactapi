@@ -16,7 +16,7 @@ const Signup = () => {
 
     }
     let validatePassword=(password1,password2)=>{
-        //console.log(data+'/'+password2);
+        //console.log(data+'/'+password2) test;
         if (password1!=password2)
             return false;
 
@@ -86,8 +86,6 @@ const Signup = () => {
                         <div className="errorhint">{errors.password2?.type === 'minLength' && <span>請大於6個字</span>}</div>
                         <div className="errorhint">{errors.password2?.type === 'validatePassword' && <span>兩次密碼不一致</span>}</div>
 
-                        
-                        
                         <input className="formControls_btnSubmit" type="submit"  value="註冊帳號" />
                         <NavLink className="formControls_btnLink" to="/login">登入</NavLink>
                         {/* <a className="formControls_btnLink" href="#loginPage">登入</a> */}
