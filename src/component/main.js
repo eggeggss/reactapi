@@ -155,8 +155,19 @@ const Main = () => {
     //清除完成清單
     const deleteALLComplete = () => {
 
-        rawData.forEach((item, index) => {
-            item.isdone = false;
+        // rawData.forEach((item, index) => {
+        //     item.isdone = false;
+        // })
+        let cloneRaw = [...rawData];
+        cloneRaw.forEach((item, index) => {
+            if (item.isdone === true) {
+                for (var i = 0; i < rawData.length; i++) {
+                    if (rawData[i].id == item.id) {
+                        rawData.splice(i, 1);
+                        break;
+                    }
+                }
+            }
         })
 
         let tab = mytabs.find((item, idx) => {
@@ -206,7 +217,8 @@ const Main = () => {
             MySwal.fire('請輸入待辦事項');
             return;
         }
-        let maxid = rawData.length + 1;
+        let maxid = rawData[rawData.length - 1];
+        //let maxid = rawData.length + 1;
 
         rawData.push({
             id: maxid,
