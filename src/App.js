@@ -29,7 +29,6 @@ function App() {
     username: nickname,
   }
 
-  
   return (
     <>
       <AppContext.Provider value={appobj}>
@@ -39,9 +38,9 @@ function App() {
               <Routes>
                 <Route path="/" element={<PrivateRoute />}>
                     <Route path="/" element={<Main />} />
-                  </Route>
-                  <Route path="login" element={<Login />} />
-                  <Route path="signup" element={<Signup />} />
+                </Route>
+                <Route path="login" element={<Login />} />
+                <Route path="signup" element={<Signup />} />
               </Routes>
             </AuthContext.Provider>
         </div>

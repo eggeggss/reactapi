@@ -36,8 +36,7 @@ let webService=async (url,option)=>{
 }
 
 //確認token是否仍有效
-export const CheckToken = ()=>{
-     
+export const CheckToken = ()=>{    
     return webService(`${url}/check`, {
         headers: {
             'Content-Type': 'application/json',
@@ -47,6 +46,7 @@ export const CheckToken = ()=>{
     });
 }
 
+//註冊
 export const ApiSignup = (data) => {    
     let jsondata=JSON.stringify(data);
     return webService(`${url}/users`,{
@@ -58,6 +58,7 @@ export const ApiSignup = (data) => {
     });
 }
 
+//登入
 export const ApiLogin=(data)=>{
     let jsondata = JSON.stringify(data);
     return webService(`${url}/users/sign_in`, {
