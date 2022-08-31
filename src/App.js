@@ -15,7 +15,8 @@ function App() {
   const [isloading,setisLoading]=useState(null);
   const [snackmessage,setSnackmessage]=useState("");
   
-  
+  let nickname=localStorage.getItem('nickname');
+ 
   let authobj={
      token:token,
      setToken:setToken,
@@ -25,8 +26,10 @@ function App() {
     setisLoading: setisLoading,
     snackmessage: snackmessage,
     setSnackmessage: setSnackmessage,
+    username: nickname,
   }
 
+  
   return (
     <>
       <AppContext.Provider value={appobj}>
