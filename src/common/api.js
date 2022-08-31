@@ -12,9 +12,14 @@ let webService=async (url,option)=>{
     let response = await fetch(url, option);  
 
     if (response.status >= 200 && response.status <= 204) {
-        let data = await response.json();    
-        let token=response.headers.get("authorization");  
+        let data="";
+        try{
+            data = await response.json();    
+        }catch(error){
 
+        }
+        let token=response.headers.get("authorization");  
+        
         return {
             result:true,
             token: token,
@@ -58,6 +63,18 @@ export const ApiSignup = (data) => {
     });
 }
 
+//撤銷token
+export const ApiSingout=()=>{
+
+    return webService(`${url}/users/sign_out`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': localStorage.getItem('token'),
+        },
+        method: "Delete"
+    });
+}
+
 //登入
 export const ApiLogin=(data)=>{
     let jsondata = JSON.stringify(data);
@@ -70,4 +87,14 @@ export const ApiLogin=(data)=>{
     });
 }
 
+export const ApiGetList=()=>{
+    return webService(`${url}/todos`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': localStorage.getItem('token'),
+        },
+        method: "Get"
+    });
+
+}
 

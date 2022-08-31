@@ -1,16 +1,18 @@
 import React from 'react';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
-import { useState,useEffect } from 'react';
+import { useState, useEffect, useMount, useRef } from 'react';
 import TodoList from './todoList';
 import { useApp,AppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import { ApiSingout, ApiGetList } from '../common/api';
 
 const MySwal = withReactContent(Swal)
 
-let rawData = [{ id: 1, item: "把冰箱發霉的檸檬拿去丟", isdone: false, }, { id: 2, item: "打電話叫媽媽匯款給我", isdone: false, },
-{ id: 3, item: "整理電腦資料夾", isdone: false, }, { id: 4, item: "繳電費水費瓦斯費", isdone: false, },
-{ id: 5, item: "約vicky禮拜三泡溫泉", isdone: false, }, { id: 6, item: "約ada禮拜四吃晚餐", isdone: false, }];
+let rawData =[];
+// let rawData = [{ id: 1, item: "把冰箱發霉的檸檬拿去丟", isdone: false, }, { id: 2, item: "打電話叫媽媽匯款給我", isdone: false, },
+// { id: 3, item: "整理電腦資料夾", isdone: false, }, { id: 4, item: "繳電費水費瓦斯費", isdone: false, },
+// { id: 5, item: "約vicky禮拜三泡溫泉", isdone: false, }, { id: 6, item: "約ada禮拜四吃晚餐", isdone: false, }];
 
 const tabs = [{ id: 1, item: "全部", className: "active", }, { id: 2, item: "待完成", className: "", },
 { id: 3, item: "已完成", className: "", }];
@@ -18,10 +20,30 @@ const tabs = [{ id: 1, item: "全部", className: "active", }, { id: 2, item: "�
 const Main = () => {
 
     const [mytabs, settabs] = useState(tabs);
-    const [todolist, setTodoList] = useState(rawData);
+    const [todolist, setTodoList] = useState([]);
     const [undocount, setUndocount] = useState(0);
     const [currentinput, setCurrentInput] = useState("");
     let navigate = useNavigate();
+
+
+    useEffect(()=>{     
+         ApiGetList().then((res)=>{
+             const {todos}=res.content;
+             rawData=[];
+             let maxid=getMaxid();            
+             todos.forEach((item,index)=>{
+                 rawData.push({
+                     id: maxid,
+                     guid:item.id,
+                     item:item.content,
+                     isdone: (item.completed_at===null)? false:true ,
+                 })
+             })
+             setTodoList([...rawData]);
+             watchData();
+        });
+
+    },[]);
 
     //tab切換時更新Todolist
     useEffect(() => {
@@ -29,6 +51,17 @@ const Main = () => {
         watchData();
 
     }, [mytabs])
+
+    const getMaxid=()=>{
+
+        let maxid = 0;
+        if (rawData.length == 0) {
+            maxid = 1;
+        } else {
+            maxid = rawData[rawData.length - 1].id;
+        }
+        return maxid;
+    }
 
     //取得完成清單
     let getCompleteList = () => {
@@ -215,8 +248,8 @@ const Main = () => {
             MySwal.fire('請輸入待辦事項');
             return;
         }
-        let maxid = rawData[rawData.length - 1];
-        //let maxid = rawData.length + 1;
+        //let maxid = rawData[rawData.length - 1];
+        let maxid = getMaxid();
 
         rawData.push({
             id: maxid,
@@ -255,7 +288,7 @@ const Main = () => {
                                        </li>
                                        <li>
 
-                                           <a href="#loginPage" onClick={(e)=>{
+                                           <a href="#loginPage" onClick={async (e)=>{
                                                 e.preventDefault();
                                                let message="確定登出？";
                                                MySwal.fire({
@@ -269,8 +302,13 @@ const Main = () => {
                                                }).then((result) => {
                                                    if (result.isConfirmed) {
 
-                                                       localStorage.clear();
-                                                       navigate('/login',{replace:true});
+                                                       ApiSingout().then((res)=>{
+
+                                                           localStorage.clear();
+                                                           navigate('/login', { replace: true });
+
+                                                       });
+                                                       
 
                                                    }
                                                })

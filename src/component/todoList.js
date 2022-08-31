@@ -18,7 +18,7 @@ const TodoList = (prop) => {
         <div className="todoList_items">
             <ul className="todoList_item">
                 {
-                    (undocount === 0 && currenttab.item === "待完成") ? (<li style={{ paddingLeft: "35%", }}>目前尚無待辦事項</li>) : ""
+                    (undocount === 0 ) ? (<li style={{ paddingLeft: "35%", }}>目前尚無待辦事項</li>) : ""
                 }
                 {
                     todolist.map((item, idx) => {

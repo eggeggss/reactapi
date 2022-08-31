@@ -21,7 +21,7 @@ const Login = () => {
         });
 
     const onSubmit = async (data) => {
-            //console.log(data.email,data.password);
+        
             const {email,password}=data;
 
             setisLoading(true);
@@ -40,7 +40,6 @@ const Login = () => {
                 reset();
             }else{
                
-                console.log(response.content);
                 const { nickname }= response.content;
                 
                 username = nickname;
