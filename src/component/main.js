@@ -3,6 +3,8 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { useState,useEffect } from 'react';
 import TodoList from './todoList';
+import { useApp,AppContext } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const MySwal = withReactContent(Swal)
 
@@ -19,6 +21,7 @@ const Main = () => {
     const [todolist, setTodoList] = useState(rawData);
     const [undocount, setUndocount] = useState(0);
     const [currentinput, setCurrentInput] = useState("");
+    let navigate = useNavigate();
 
     //tab切換時更新Todolist
     useEffect(() => {
@@ -154,9 +157,6 @@ const Main = () => {
     //清除完成清單
     const deleteALLComplete = () => {
 
-        // rawData.forEach((item, index) => {
-        //     item.isdone = false;
-        // })
         let cloneRaw = [...rawData];
         cloneRaw.forEach((item, index) => {
             if (item.isdone === true) {
@@ -178,7 +178,6 @@ const Main = () => {
         //更新待完成項目的數字
         let undolist = getUndoList();
         setUndocount(undolist.length);
-        //setCompletecount(completelist.length);
 
         switch (tab.item) {
             case '全部':
@@ -234,81 +233,111 @@ const Main = () => {
     }
 
     return (
-        <div id="todoListPage" className="bg-half">
-            <nav>
-                <h1>
-                    
-                    <a href="#">ONLINE TODO LIST</a>
-                
-                </h1>
-                <ul>
-                    <li className="todo_sm">
-                        
-                        <a href="#">
-                            
-                            <span>王小明的代辦</span>
-                        
-                        </a>
-                    
-                    </li>
-                    <li>
-                        
-                        <a href="#loginPage">登出</a>
-                    
-                    </li>
-                </ul>
-            </nav>
-            <div className="conatiner todoListPage vhContainer">
-                <div className="todoList_Content">
-                    <div className="inputBox">
-                        <input type="text" placeholder="請輸入待辦事項"
-                            value={currentinput}
-                            onChange={changeCurrentInput}
-                            onKeyPress={keydown}/>
-                        <a href="#" onClick={addNewItem}>
-                            <i className="fa fa-plus"></i>
-                        </a>
-                    </div>
-                    <div className="todoList_list">
-                        <ul className="todoList_tab">
-                            {mytabs.map((item, idx) => {
-                                return (
-                                    <li key={idx}>
-                                        <a
-                                            href="#"
-                                            onClick={() => {
-                                                let newitem = mytabs.filter((child, idx) => {
-                                                    if (item.id != child.id) {
-                                                        child.className = "";
-                                                    } else {
-                                                        child.className = "active";
-                                                    }
-                                                    return child;
-                                                });
+        <AppContext.Consumer>
+                {(e)=>{                    
+                       return(
+                           <div id="todoListPage" className="bg-half">
+                               <nav>
+                                   <h1>
 
-                                                settabs(newitem);
+                                       <a href="#">ONLINE TODO LIST</a>
 
-                                            }}
-                                            className={item.className}>{item.item}
-                                        </a>
-                                    </li>
-                                );
-                            })}
-                        </ul>
+                                   </h1>
+                                   <ul>
+                                       <li className="todo_sm">
 
-                        <TodoList todolist={todolist}
-                            undocount={undocount}
-                            checkDoneItem={checkDoneItem}
-                            deleteItem={deleteItem}
-                            deleteALLComplete={deleteALLComplete}
-                            getCompleteList={getCompleteList}
-                            mytabs={mytabs}
-                        />
-                    </div>
-                </div>
-            </div>
-            <h1>todopage</h1>
-        </div>
+                                           <a href="#">
+
+                                               <span>{e.username}的代辦</span>
+
+                                           </a>
+
+                                       </li>
+                                       <li>
+
+                                           <a href="#loginPage" onClick={(e)=>{
+                                                e.preventDefault();
+                                               let message="確定登出？";
+                                               MySwal.fire({
+                                                   title: 'Are you sure?',
+                                                   text: message,
+                                                   icon: 'warning',
+                                                   showCancelButton: true,
+                                                   confirmButtonColor: '#3085d6',
+                                                   cancelButtonColor: '#d33',
+                                                   confirmButtonText: 'Yes,Logout!'
+                                               }).then((result) => {
+                                                   if (result.isConfirmed) {
+
+                                                       localStorage.clear();
+                                                       navigate('/login',{replace:true});
+
+                                                   }
+                                               })
+
+                                                
+                                           }}>登出</a>
+
+                                       </li>
+                                   </ul>
+                               </nav>
+                               <div className="conatiner todoListPage vhContainer">
+                                   <div className="todoList_Content">
+                                       <div className="inputBox">
+                                           <input type="text" placeholder="請輸入待辦事項"
+                                               value={currentinput}
+                                               onChange={changeCurrentInput}
+                                               onKeyPress={keydown} />
+                                           <a href="#" onClick={addNewItem}>
+                                               <i className="fa fa-plus"></i>
+                                           </a>
+                                       </div>
+                                       <div className="todoList_list">
+                                           <ul className="todoList_tab">
+                                               {mytabs.map((item, idx) => {
+                                                   return (
+                                                       <li key={idx}>
+                                                           <a
+                                                               href="#"
+                                                               onClick={() => {
+                                                                   let newitem = mytabs.filter((child, idx) => {
+                                                                       if (item.id != child.id) {
+                                                                           child.className = "";
+                                                                       } else {
+                                                                           child.className = "active";
+                                                                       }
+                                                                       return child;
+                                                                   });
+
+                                                                   settabs(newitem);
+
+                                                               }}
+                                                               className={item.className}>{item.item}
+                                                           </a>
+                                                       </li>
+                                                   );
+                                               })}
+                                           </ul>
+
+                                           <TodoList todolist={todolist}
+                                               undocount={undocount}
+                                               checkDoneItem={checkDoneItem}
+                                               deleteItem={deleteItem}
+                                               deleteALLComplete={deleteALLComplete}
+                                               getCompleteList={getCompleteList}
+                                               mytabs={mytabs}
+                                           />
+                                       </div>
+                                   </div>
+                               </div>
+                               <h1>todopage</h1>
+                           </div>
+
+                       )
+
+                }}
+        </AppContext.Consumer>
+
     );
 };
 

@@ -13,7 +13,7 @@ const MySwal = withReactContent(Swal)
 const Login = () => {
     let navigate = useNavigate();
     const [hint, setHint] = useState('');
-    const { isloading, setisLoading, snackmessage, setSnackmessage } = useApp();
+    let {isloading, setisLoading, snackmessage, setSnackmessage ,username} = useApp();
     const { register, handleSubmit,
         formState: { errors }, getValues, reset } = useForm({
             mode: 'onChange',
@@ -39,11 +39,16 @@ const Login = () => {
                 MySwal.fire('帳號或密碼錯誤');
                 reset();
             }else{
-                //MySwal.fire("OK");
+               
+                console.log(response.content);
+                const { nickname }= response.content;
+                
+                username = nickname;
+                
                 navigate('/',{replace:true});
 
                 localStorage.setItem('token',response.token);
-                localStorage.setItem('expire', new Date());
+                localStorage.setItem('nickname', nickname);
 
                 setSnackmessage("歡迎到ONLINE TODO LIST");
                 await timeout(5000);

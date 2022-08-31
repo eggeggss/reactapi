@@ -36,9 +36,9 @@ let webService=async (url,option)=>{
 }
 
 //確認token是否仍有效
-export const CheckToken = (data)=>{
+export const CheckToken = ()=>{
      
-    return webService(`${url}/users`, {
+    return webService(`${url}/check`, {
         headers: {
             'Content-Type': 'application/json',
             'authorization':localStorage.getItem('token'),
