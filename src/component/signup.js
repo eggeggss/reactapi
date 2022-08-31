@@ -6,29 +6,22 @@ import { ApiSignup, timeout } from '../common/api';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
 import { useApp } from '../context/AppContext';
+import rhefZ3 from '../img/rhefZ3.png';
+import tj3Bdk from '../img/tj3Bdk.png';
+
 
 const MySwal = withReactContent(Swal)
 
-
 const Signup = () => {
+    let navigate = useNavigate();
     const [hint, setHint] = useState('');
     const { isloading, setisLoading, snackmessage, setSnackmessage } = useApp();
-    let navigate = useNavigate();
-
-    
-    useEffect(()=>{
-        //notify();
-    },[])
-
-    
     const { register, handleSubmit, 
         formState: { errors }, getValues, reset } = useForm({
         mode:'onChange',
         reValidateMode: 'onChange',
     });
-
-
-
+    
     const onSubmit=async(data)=>{
 
         let {email,username,password1}=data;
@@ -48,7 +41,7 @@ const Signup = () => {
         if (response.result==false){
             MySwal.fire(response.content);
         }else{
-            //MySwal.fire('註冊成功');
+         
             reset();
 
             navigate('/login', { replace: true });
@@ -61,7 +54,7 @@ const Signup = () => {
 
     }
     let validatePassword=(password1,password2)=>{
-        //console.log(data+'/'+password2) test;
+        
         if (password1!=password2)
             return false;
 
@@ -72,8 +65,8 @@ const Signup = () => {
         <div id="signUpPage" className="bg-yellow">
             <div className="conatiner signUpPage vhContainer">
                 <div className="side">
-                    <a href="#"><img className="logoImg" src="https://upload.cc/i1/2022/03/23/rhefZ3.png" alt="" /></a>
-                    <img className="d-m-n" src="https://upload.cc/i1/2022/03/23/tj3Bdk.png" alt="workImg" />
+                    <a href="#"><img className="logoImg" src={rhefZ3} alt="" /></a>
+                    <img className="d-m-n" src={tj3Bdk} alt="workImg" />
                 </div>
                 <div>
                     <form className="formControls" onSubmit={handleSubmit(onSubmit)}>
