@@ -15,13 +15,18 @@ const Login = () => {
     const [hint, setHint] = useState('');
     let {isloading, setisLoading, snackmessage, setSnackmessage ,username} = useApp();
     const { register, handleSubmit,
-        formState: { errors }, getValues, reset } = useForm({
+        formState: { errors }, getValues, reset, setFocus } = useForm({
             mode: 'onChange',
             reValidateMode: 'onChange',
         });
+    useEffect(()=>{
+        
+        setFocus('email');
+
+    },[])
 
     const onSubmit = async (data) => {
-        
+            //console.log(data.email,data.password);
             const {email,password}=data;
 
             setisLoading(true);
@@ -40,6 +45,7 @@ const Login = () => {
                 reset();
             }else{
                
+                console.log(response.content);
                 const { nickname }= response.content;
                 
                 username = nickname;

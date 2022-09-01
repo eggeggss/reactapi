@@ -29,10 +29,16 @@ let webService=async (url,option)=>{
     } else {
         let data = await response.json();
 
-
         let errmsg = ""
+
         try{
-             data.error && data.error.join('\r\n');
+
+            if (data.error.length>0){
+                errmsg = data.error.join('\r\n');
+            }else{
+                errmsg=data;
+            }
+            //data.error && data.error.join('\r\n');
         }catch(error){
             errmsg = data.error;
         }

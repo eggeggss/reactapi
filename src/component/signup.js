@@ -17,11 +17,18 @@ const Signup = () => {
     const [hint, setHint] = useState('');
     const { isloading, setisLoading, snackmessage, setSnackmessage } = useApp();
     const { register, handleSubmit, 
-        formState: { errors }, getValues, reset } = useForm({
+        formState: { errors }, getValues, reset, setFocus } = useForm({
         mode:'onChange',
         reValidateMode: 'onChange',
     });
-    
+
+    useEffect(() => {
+
+        setFocus('email');
+
+    }, [])
+
+
     const onSubmit=async(data)=>{
 
         let {email,username,password1}=data;
