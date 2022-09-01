@@ -13,7 +13,7 @@ const TodoItem = (prop) => {
                 <span>{item.item}</span>
             </label>
             <a href="#" onClick={() => {
-                deleteItem(item.id, item.item);
+                deleteItem(item.id, item.item,item.guid);
             }}>
                 <i className="fa fa-times"></i>
             </a>

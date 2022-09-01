@@ -29,7 +29,14 @@ let webService=async (url,option)=>{
     } else {
         let data = await response.json();
 
-        let errmsg = data.error && data.error.join('\r\n');
+
+        let errmsg = ""
+        try{
+             data.error && data.error.join('\r\n');
+        }catch(error){
+            errmsg = data.error;
+        }
+
         if (errmsg===undefined)
             errmsg="";
 
@@ -86,7 +93,7 @@ export const ApiLogin=(data)=>{
         body: jsondata
     });
 }
-
+//取得todo list
 export const ApiGetList=()=>{
     return webService(`${url}/todos`, {
         headers: {
@@ -97,4 +104,44 @@ export const ApiGetList=()=>{
     });
 
 }
+
+//新增 todo list
+export const ApiAddItem = (data)=>{
+    let jsondata = JSON.stringify(data);
+    console.log(jsondata);
+    return webService(`${url}/todos`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': localStorage.getItem('token')
+        },
+        body: jsondata,
+        method: "POST"
+    });
+}
+
+
+//刪除 todo list
+export const ApiDelItem = (id) => {
+
+    return webService(`${url}/todos/${id}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': localStorage.getItem('token'),
+        },
+        method: "DELETE"
+    });
+}
+
+//變更狀態
+export const ApiToggleItem = (id) => {
+
+    return webService(`${url}/todos/${id}/toggle`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': localStorage.getItem('token'),
+        },
+        method: "PATCH"
+    });
+}
+
 

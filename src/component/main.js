@@ -3,13 +3,13 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { useState, useEffect, useMount, useRef } from 'react';
 import TodoList from './todoList';
-import { useApp,AppContext } from '../context/AppContext';
+import { useApp, AppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ApiSingout, ApiGetList } from '../common/api';
+import { ApiSingout, ApiGetList, ApiAddItem,ApiDelItem } from '../common/api';
 
 const MySwal = withReactContent(Swal)
 
-let rawData =[];
+let rawData = [];
 // let rawData = [{ id: 1, item: "把冰箱發霉的檸檬拿去丟", isdone: false, }, { id: 2, item: "打電話叫媽媽匯款給我", isdone: false, },
 // { id: 3, item: "整理電腦資料夾", isdone: false, }, { id: 4, item: "繳電費水費瓦斯費", isdone: false, },
 // { id: 5, item: "約vicky禮拜三泡溫泉", isdone: false, }, { id: 6, item: "約ada禮拜四吃晚餐", isdone: false, }];
@@ -26,24 +26,26 @@ const Main = () => {
     let navigate = useNavigate();
 
 
-    useEffect(()=>{     
-         ApiGetList().then((res)=>{
-             const {todos}=res.content;
-             rawData=[];
-             let maxid=getMaxid();            
-             todos.forEach((item,index)=>{
-                 rawData.push({
-                     id: maxid,
-                     guid:item.id,
-                     item:item.content,
-                     isdone: (item.completed_at===null)? false:true ,
-                 })
-             })
-             setTodoList([...rawData]);
-             watchData();
+    useEffect(() => {
+        ApiGetList().then((res) => {
+            const { todos } = res.content;
+            rawData = [];
+           
+            todos.forEach((item, index) => {
+                let maxid = getMaxid();
+                rawData.push({
+                    id: maxid,
+                    guid: item.id,
+                    item: item.content,
+                    isdone: (item.completed_at === null) ? false : true,
+                })
+            })
+            console.log(rawData);
+            setTodoList([...rawData]);
+            watchData();
         });
 
-    },[]);
+    }, []);
 
     //tab切換時更新Todolist
     useEffect(() => {
@@ -52,13 +54,13 @@ const Main = () => {
 
     }, [mytabs])
 
-    const getMaxid=()=>{
+    const getMaxid = () => {
 
         let maxid = 0;
         if (rawData.length == 0) {
             maxid = 1;
         } else {
-            maxid = rawData[rawData.length - 1].id;
+            maxid = rawData[rawData.length - 1].id + 1;
         }
         return maxid;
     }
@@ -150,7 +152,7 @@ const Main = () => {
     }
 
     //click delete item
-    const deleteItem = (id, name) => {
+    const deleteItem = (id, name,guid) => {
 
         let message = `刪除 ${name}`;
         MySwal.fire({
@@ -164,25 +166,38 @@ const Main = () => {
         }).then((result) => {
             if (result.isConfirmed) {
 
-                let clonetodolist = [...todolist];
-                let newlist = clonetodolist.filter((item, idx) => {
-                    if (item.id != id) {
-                        return item;
+                
+                ApiDelItem(guid).then(res=>{
+
+                    if (res.result===true){
+
+                        let clonetodolist = [...todolist];
+                        let newlist = clonetodolist.filter((item, idx) => {
+                            if (item.id != id) {
+                                return item;
+                            }
+                        })
+
+                        for (var i = 0; i < rawData.length; i++) {
+                            if (rawData[i].id == id) {
+                                rawData.splice(i, 1);
+                                break;
+                            }
+                        }
+
+                        setTodoList(newlist);
+
+                        //更新待完成項目的數字
+                        let undolist = getUndoList();
+                        setUndocount(undolist.length);
+
+                    }else{
+                        MySwal('刪除失敗');
                     }
-                })
 
-                for (var i = 0; i < rawData.length; i++) {
-                    if (rawData[i].id == id) {
-                        rawData.splice(i, 1);
-                        break;
-                    }
-                }
 
-                setTodoList(newlist);
+                });
 
-                //更新待完成項目的數字
-                let undolist = getUndoList();
-                setUndocount(undolist.length);
             }
         })
     }
@@ -248,132 +263,150 @@ const Main = () => {
             MySwal.fire('請輸入待辦事項');
             return;
         }
-        //let maxid = rawData[rawData.length - 1];
         let maxid = getMaxid();
 
-        rawData.push({
+
+
+        let newitem = {
             id: maxid,
             item: currentinput,
             isdone: false,
+        }
+
+        ApiAddItem({
+            todo: {
+                content: currentinput,
+            }
+        }).then(res => {
+
+            if (res.result === true) {
+                
+                rawData.push(newitem);
+                //更新畫面
+                watchData();
+                //清空input
+                setCurrentInput('');
+                console.log(res.result);
+            }else{
+                MySwal.fire("新增失敗");
+            }
+
         })
 
-        //更新畫面
-        watchData();
+        //let maxid = rawData[rawData.length - 1];
 
-        //清空input
-        setCurrentInput('');
 
     }
 
     return (
         <AppContext.Consumer>
-                {(e)=>{                    
-                       return(
-                           <div id="todoListPage" className="bg-half">
-                               <nav>
-                                   <h1>
+            {(e) => {
+                return (
+                    <div id="todoListPage" className="bg-half">
+                        <nav>
+                            <h1>
 
-                                       <a href="#">ONLINE TODO LIST</a>
+                                <a href="#">ONLINE TODO LIST</a>
 
-                                   </h1>
-                                   <ul>
-                                       <li className="todo_sm">
+                            </h1>
+                            <ul>
+                                <li className="todo_sm">
 
-                                           <a href="#">
+                                    <a href="#">
 
-                                               <span>{e.username}的代辦</span>
+                                        <span>{e.username}的代辦</span>
 
-                                           </a>
+                                    </a>
 
-                                       </li>
-                                       <li>
+                                </li>
+                                <li>
 
-                                           <a href="#loginPage" onClick={async (e)=>{
-                                                e.preventDefault();
-                                               let message="確定登出？";
-                                               MySwal.fire({
-                                                   title: 'Are you sure?',
-                                                   text: message,
-                                                   icon: 'warning',
-                                                   showCancelButton: true,
-                                                   confirmButtonColor: '#3085d6',
-                                                   cancelButtonColor: '#d33',
-                                                   confirmButtonText: 'Yes,Logout!'
-                                               }).then((result) => {
-                                                   if (result.isConfirmed) {
+                                    <a href="#loginPage" onClick={async (e) => {
+                                        e.preventDefault();
+                                        let message = "確定登出？";
+                                        MySwal.fire({
+                                            title: 'Are you sure?',
+                                            text: message,
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '#3085d6',
+                                            cancelButtonColor: '#d33',
+                                            confirmButtonText: 'Yes,Logout!'
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
 
-                                                       ApiSingout().then((res)=>{
+                                                ApiSingout().then((res) => {
 
-                                                           localStorage.clear();
-                                                           navigate('/login', { replace: true });
+                                                    localStorage.clear();
+                                                    navigate('/login', { replace: true });
 
-                                                       });
-                                                       
+                                                });
 
-                                                   }
-                                               })
 
-                                                
-                                           }}>登出</a>
+                                            }
+                                        })
 
-                                       </li>
-                                   </ul>
-                               </nav>
-                               <div className="conatiner todoListPage vhContainer">
-                                   <div className="todoList_Content">
-                                       <div className="inputBox">
-                                           <input type="text" placeholder="請輸入待辦事項"
-                                               value={currentinput}
-                                               onChange={changeCurrentInput}
-                                               onKeyPress={keydown} />
-                                           <a href="#" onClick={addNewItem}>
-                                               <i className="fa fa-plus"></i>
-                                           </a>
-                                       </div>
-                                       <div className="todoList_list">
-                                           <ul className="todoList_tab">
-                                               {mytabs.map((item, idx) => {
-                                                   return (
-                                                       <li key={idx}>
-                                                           <a
-                                                               href="#"
-                                                               onClick={() => {
-                                                                   let newitem = mytabs.filter((child, idx) => {
-                                                                       if (item.id != child.id) {
-                                                                           child.className = "";
-                                                                       } else {
-                                                                           child.className = "active";
-                                                                       }
-                                                                       return child;
-                                                                   });
 
-                                                                   settabs(newitem);
+                                    }}>登出</a>
 
-                                                               }}
-                                                               className={item.className}>{item.item}
-                                                           </a>
-                                                       </li>
-                                                   );
-                                               })}
-                                           </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                        <div className="conatiner todoListPage vhContainer">
+                            <div className="todoList_Content">
+                                <div className="inputBox">
+                                    <input type="text" placeholder="請輸入待辦事項"
+                                        value={currentinput}
+                                        onChange={changeCurrentInput}
+                                        onKeyPress={keydown} />
+                                    <a href="#" onClick={addNewItem}>
+                                        <i className="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div className="todoList_list">
+                                    <ul className="todoList_tab">
+                                        {mytabs.map((item, idx) => {
+                                            return (
+                                                <li key={idx}>
+                                                    <a
+                                                        href="#"
+                                                        onClick={() => {
+                                                            let newitem = mytabs.filter((child, idx) => {
+                                                                if (item.id != child.id) {
+                                                                    child.className = "";
+                                                                } else {
+                                                                    child.className = "active";
+                                                                }
+                                                                return child;
+                                                            });
 
-                                           <TodoList todolist={todolist}
-                                               undocount={undocount}
-                                               checkDoneItem={checkDoneItem}
-                                               deleteItem={deleteItem}
-                                               deleteALLComplete={deleteALLComplete}
-                                               getCompleteList={getCompleteList}
-                                               mytabs={mytabs}
-                                           />
-                                       </div>
-                                   </div>
-                               </div>
-                               <h1>todopage</h1>
-                           </div>
+                                                            settabs(newitem);
 
-                       )
+                                                        }}
+                                                        className={item.className}>{item.item}
+                                                    </a>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
 
-                }}
+                                    <TodoList todolist={todolist}
+                                        undocount={undocount}
+                                        checkDoneItem={checkDoneItem}
+                                        deleteItem={deleteItem}
+                                        deleteALLComplete={deleteALLComplete}
+                                        getCompleteList={getCompleteList}
+                                        mytabs={mytabs}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <h1>todopage</h1>
+                    </div>
+
+                )
+
+            }}
         </AppContext.Consumer>
 
     );
