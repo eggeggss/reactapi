@@ -295,11 +295,7 @@ const Main = () => {
                     break;
                 default:
             }
-        })
-
-
-
-        
+        })      
     }
 
     const changeCurrentInput = (e) => {
