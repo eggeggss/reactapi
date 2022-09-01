@@ -45,7 +45,7 @@ const Login = () => {
                 reset();
             }else{
                
-                console.log(response.content);
+                //console.log(response.content);
                 const { nickname }= response.content;
                 
                 username = nickname;

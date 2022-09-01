@@ -8,7 +8,7 @@ const TodoItem = (prop) => {
                 <input className="todoList_input" type="checkbox"
                     checked={item.isdone}
                     value={item.isdone} onChange={(e) => {
-                        checkDoneItem(item.id);
+                        checkDoneItem(item.id,item.guid);
                     }} />
                 <span>{item.item}</span>
             </label>
