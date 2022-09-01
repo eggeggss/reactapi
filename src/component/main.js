@@ -5,7 +5,7 @@ import { useState, useEffect, useMount, useRef } from 'react';
 import TodoList from './todoList';
 import { useApp, AppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ApiSingout, ApiGetList, ApiAddItem,ApiDelItem } from '../common/api';
+import { ApiSingout, ApiGetList, ApiAddItem,ApiDelItem ,ApiToggleItem,timeout} from '../common/api';
 
 const MySwal = withReactContent(Swal)
 
@@ -23,6 +23,9 @@ const Main = () => {
     const [todolist, setTodoList] = useState([]);
     const [undocount, setUndocount] = useState(0);
     const [currentinput, setCurrentInput] = useState("");
+    const { isloading, setisLoading, snackmessage, setSnackmessage } = useApp();
+
+
     let navigate = useNavigate();
 
 
@@ -30,7 +33,20 @@ const Main = () => {
         ApiGetList().then((res) => {
             const { todos } = res.content;
             rawData = [];
-           
+
+            //不想被api打回來的順序影響
+            todos.sort(function (a, b) {
+                var nameA = a.content.toUpperCase(); 
+                var nameB = b.content.toUpperCase(); 
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+                return 0;
+            });
+            
             todos.forEach((item, index) => {
                 let maxid = getMaxid();
                 rawData.push({
@@ -40,7 +56,7 @@ const Main = () => {
                     isdone: (item.completed_at === null) ? false : true,
                 })
             })
-            console.log(rawData);
+            
             setTodoList([...rawData]);
             watchData();
         });
@@ -118,37 +134,40 @@ const Main = () => {
     }
 
     //click checkbox
-    const checkDoneItem = (id) => {
+    const checkDoneItem = (id,guid) => {
 
-        let clone = [...todolist];
-        let newitems = clone.map((item1, index) => {
-            if (item1.id === id) {
-                item1.isdone = !item1.isdone;
+        ApiToggleItem(guid).then(res=>{
+
+            let clone = [...todolist];
+            let newitems = clone.map((item1, index) => {
+                if (item1.id === id) {
+                    item1.isdone = !item1.isdone;
+                }
+                return item1;
+            })
+
+            setTodoList(newitems);
+
+            let tab = mytabs.find((item, idx) => {
+                if (item.className === "active") {
+                    return true;
+                }
+            })
+
+            //更新待完成項目的數字
+            let undolist = getUndoList();
+            setUndocount(undolist.length);
+            //setCompletecount(completelist.length);
+
+            if (tab.item === "已完成") {
+                let completelist = getCompleteList();
+                setTodoList(completelist);
+
+            } else if (tab.item === "待完成") {
+                setTodoList(undolist);
             }
-            return item1;
-        })
 
-        setTodoList(newitems);
-
-        let tab = mytabs.find((item, idx) => {
-            if (item.className === "active") {
-                return true;
-            }
-        })
-
-        //更新待完成項目的數字
-        let undolist = getUndoList();
-        setUndocount(undolist.length);
-        //setCompletecount(completelist.length);
-
-        if (tab.item === "已完成") {
-            let completelist = getCompleteList();
-            setTodoList(completelist);
-
-        } else if (tab.item === "待完成") {
-            setTodoList(undolist);
-        }
-
+        });    
     }
 
     //click delete item
@@ -165,8 +184,7 @@ const Main = () => {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-
-                
+             
                 ApiDelItem(guid).then(res=>{
 
                     if (res.result===true){
@@ -202,44 +220,86 @@ const Main = () => {
         })
     }
 
-    //清除完成清單
-    const deleteALLComplete = () => {
+    let deletePromise=()=>{
 
         let cloneRaw = [...rawData];
-        cloneRaw.forEach((item, index) => {
-            if (item.isdone === true) {
-                for (var i = 0; i < rawData.length; i++) {
-                    if (rawData[i].id == item.id) {
-                        rawData.splice(i, 1);
-                        break;
+        let rawData_0 = rawData;
+        return new Promise(function (resolve, reject) {
+
+            let delete_items = [];
+
+            cloneRaw.forEach((item, index) => {
+                if (item.isdone === true) {
+                    for (var i = 0; i < rawData_0.length; i++) {
+                        if (rawData_0[i].id == item.id) {
+                            delete_items.push(rawData_0[i]);
+                            rawData_0.splice(i, 1);
+                            break;
+                        }
                     }
                 }
+            })
+            resolve(delete_items);
+        });
+    }
+
+    //清除完成清單
+    const deleteALLComplete = () => {
+     
+        deletePromise().then(list=>{
+            
+            return new Promise(async (resolve,reject)=>{
+
+                setisLoading(true);
+                await timeout(500);
+                //刪除中
+                list.forEach((item)=>{
+
+                    ApiDelItem(item.guid).then(res=>{
+
+                        if (res.result === false){
+                            reject('Error');
+                            MySwal.fire("Delete Error");
+                        }
+                    })
+
+                })
+                //刪除結束
+                setisLoading(false);
+
+                resolve(list);
+            })
+
+        }).then(list=>{
+
+            let tab = mytabs.find((item, idx) => {
+                if (item.className === "active") {
+                    return true;
+                }
+            })
+
+            //更新待完成項目的數字
+            let undolist = getUndoList();
+            setUndocount(undolist.length);
+
+            switch (tab.item) {
+                case '全部':
+                    setTodoList(rawData);
+                    break;
+                case '待完成':
+                    setTodoList(undolist);
+                    break;
+                case '已完成':
+                    let completelist = getCompleteList();
+                    setTodoList(completelist);
+                    break;
+                default:
             }
         })
 
-        let tab = mytabs.find((item, idx) => {
-            if (item.className === "active") {
-                return true;
-            }
-        })
 
-        //更新待完成項目的數字
-        let undolist = getUndoList();
-        setUndocount(undolist.length);
 
-        switch (tab.item) {
-            case '全部':
-                setTodoList(rawData);
-                break;
-            case '待完成':
-                setTodoList(undolist);
-                break;
-            case '已完成':
-                let completelist = getCompleteList();
-                setTodoList(completelist);
-                break;
-            default:
-        }
+        
     }
 
     const changeCurrentInput = (e) => {
@@ -265,14 +325,6 @@ const Main = () => {
         }
         let maxid = getMaxid();
 
-
-
-        let newitem = {
-            id: maxid,
-            item: currentinput,
-            isdone: false,
-        }
-
         ApiAddItem({
             todo: {
                 content: currentinput,
@@ -281,12 +333,21 @@ const Main = () => {
 
             if (res.result === true) {
                 
+                const {id}=res.content;
+
+                let newitem = {
+                    id: maxid,
+                    item: currentinput,
+                    isdone: false,
+                    guid:id,
+                }
+
                 rawData.push(newitem);
                 //更新畫面
                 watchData();
                 //清空input
                 setCurrentInput('');
-                console.log(res.result);
+                //console.log(res.content);
             }else{
                 MySwal.fire("新增失敗");
             }
