@@ -89,6 +89,7 @@ const Signup = () => {
                               />
                         <div className="errorhint">{errors.email?.type === 'required' && <span>此欄位必填</span>}</div>
                         <div className="errorhint">{errors.email?.type === 'pattern' && <span>email格式錯誤</span>}</div>
+                        <div className="errorhint" style={{ fontWeight: "bold", }}>{errors.email?.type === 'validateExists' && <span>帳號已存在</span>}</div>
 
 
                         <label className="formControls_label" htmlFor="name">您的暱稱</label>
